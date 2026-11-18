@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import math
 import pygame
+import pygame.gfxdraw
 
 from beatmap_parser import HitObject
 from game_objects import GameState
@@ -12,6 +13,16 @@ PANEL = (25, 30, 45)
 CYAN = (69, 220, 235)
 PINK = (250, 88, 170)
 WHITE = (238, 244, 255)
+
+
+def approach_timing(approach_rate: float) -> tuple[float, float]:
+    if approach_rate < 5:
+        return (1200 + 600 * (5 - approach_rate) / 5,
+                800 + 400 * (5 - approach_rate) / 5)
+    if approach_rate > 5:
+        return (1200 - 750 * (approach_rate - 5) / 5,
+                800 - 500 * (approach_rate - 5) / 5)
+    return 1200, 800
 
 
 class Renderer:
@@ -56,6 +67,21 @@ class Renderer:
     def field(self, pos: tuple[float, float], rect: pygame.Rect, scale: float) -> tuple[int, int]:
         return round(rect.x + pos[0] * scale), round(rect.y + pos[1] * scale)
 
+    def draw_approach_circle(self, point: tuple[int, int], radius: float,
+                             color: tuple[int, int, int], alpha: int, scale: float) -> None:
+        thickness = max(1, round(3.5 * scale))
+        radius = max(1, round(radius))
+        padding = thickness + 2
+        diameter = (radius + padding) * 2 + 1
+        ring = pygame.Surface((diameter, diameter), pygame.SRCALPHA)
+        center = (diameter // 2, diameter // 2)
+        pygame.draw.circle(ring, color, center, radius, thickness)
+        pygame.gfxdraw.aacircle(ring, center[0], center[1], radius, color)
+        inner_radius = max(1, radius - thickness)
+        pygame.gfxdraw.aacircle(ring, center[0], center[1], inner_radius, color)
+        ring.set_alpha(alpha)
+        self.screen.blit(ring, (point[0] - center[0], point[1] - center[1]))
+
     def draw_playfield(self, rect: pygame.Rect) -> None:
         pygame.draw.rect(self.screen, (18, 23, 37), rect)
         pygame.draw.rect(self.screen, (55, 74, 99), rect, 2)
@@ -74,17 +100,15 @@ class Renderer:
             ar *= .5
         if "HR" in state.mods:
             ar = min(10, ar * 1.4)
-        approach = (1800 - 120 * ar) if ar < 5 else (1200 - 150 * (ar - 5))
-        if "DT" in state.mods:
-            approach /= 1.5
+        preempt_ms, fade_in_ms = approach_timing(ar)
 
         for obj in state.objects[state.index:]:
             delta = obj.time - now_ms
-            if delta < -1100:
+            if delta > preempt_ms:
                 continue
-            if delta > approach + 1000:
-                continue
-            alpha = max(0, min(255, int(255 * min(1, (delta + 1000) / 180))))
+            progress = min(1.0, max(0.0, (now_ms - (obj.time - preempt_ms)) / preempt_ms))
+            fade_alpha = round(255 * min(1.0, max(0.0, (preempt_ms - delta) / fade_in_ms)))
+            alpha = fade_alpha
             if "HD" in state.mods and 0 < delta < 450:
                 alpha = int(alpha * max(0, (delta - 70) / 380))
             color = (int(70 + obj.combo * 19 % 150), int(170 + obj.combo * 11 % 80), 235)
@@ -110,18 +134,17 @@ class Renderer:
             color_surface = pygame.Surface((round(radius * 3), round(radius * 3)), pygame.SRCALPHA)
             c = (*color, fade)
             center = (color_surface.get_width() // 2, color_surface.get_height() // 2)
-            pygame.draw.circle(color_surface, (6, 11, 24, fade), center, round(radius * 1.06))
+            pygame.draw.circle(color_surface, (6, 11, 24, fade), center, round(radius))
             pygame.draw.circle(color_surface, c, center, round(radius * .92))
             pygame.draw.circle(color_surface, (225, 247, 255, fade), center, round(radius * .78), max(1, round(2 * scale)))
             pygame.draw.circle(color_surface, (18, 30, 46, fade), center, round(radius * .66))
             local = (point[0] - center[0] + color_surface.get_width() // 2,
                      point[1] - center[1] + color_surface.get_height() // 2)
-            if delta > 0:
-                progress = max(0, min(1.0, 1 - delta / max(1, approach)))
-                pygame.draw.circle(color_surface, (255, 255, 255, fade), local,
-                                   round(radius * (1.7 - .7 * progress)), max(1, round(2 * scale)))
             self.screen.blit(color_surface, (point[0] - color_surface.get_width() // 2,
                                              point[1] - color_surface.get_height() // 2))
+            if delta > 0 and "HD" not in state.mods:
+                approach_radius = radius * (3.5 - 2.5 * progress)
+                self.draw_approach_circle(point, approach_radius, color, fade_alpha, scale)
             number = self.font(max(14, round(24 * scale))).render(str(obj.combo), True, WHITE)
             number.set_alpha(fade)
             self.screen.blit(number, number.get_rect(center=point))
