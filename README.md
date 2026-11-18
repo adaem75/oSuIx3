@@ -1,4 +1,4 @@
-# PULSE — Desktop Rhythm Game
+oSuIx3 an osu recreation that SUCKS (my first project)
 
 PULSE is a playable, osu!standard-inspired desktop rhythm game written in Python. Its built-in song, hit sounds, and sample chart are generated locally, so it starts without external assets. It supports `.osu` maps, imported `.osz` song archives, and `.osk` custom skins.
 
