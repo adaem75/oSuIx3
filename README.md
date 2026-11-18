@@ -29,11 +29,11 @@ On macOS/Linux, activate with `source .venv/bin/activate` instead.
 
 Imported songs and skins are stored in `Songs/` and `Skins/` beside the executable (or in the current folder when running from source). Every `.osu` difficulty in imported archives is scanned into Song Select. Missing skin assets fall back to the built-in artwork and sounds.
 
-PULSE uses a centered, responsive 4:3 playfield in osu!'s 512×384 coordinate space. Slider timing honors uninherited beat length and inherited slider velocity; beatmap hit windows are derived from OD.
+oSuIx3 uses a centered, responsive 4:3 playfield in osu!'s 512×384 coordinate space. Slider timing honors uninherited beat length and inherited slider velocity; beatmap hit windows are derived from OD.
 
 ##HOW TO INSTALL
 
-so when u download the zip u double click it then double click the main folder then double click dist and inside will be the game, you will have to extract all into a folder
+so when u download the zip ( u download it by pressing the green code button then download zip) u double click it then double click the main folder then double click dist and inside will be the game, you will have to extract all into a folder
 so that u can repeat the same steps but instead of extracting you just double click the game, windows smartscreen might call it malicious but its not because its malicious you will have to click on more info
 then run anyway. if you still think its malicious i copied this from gemini and a bunch of ais had very similar answers.
 Microsoft Defender SmartScreen flags apps from small developers as "unrecognized" or potentially malicious primarily because they lack download reputation and an expensive digital code-signing certificate. SmartScreen does not actually scan the code inside your file for viruses—instead, it relies on a trust-based reputation system.
