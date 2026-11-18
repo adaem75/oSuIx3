@@ -11,8 +11,10 @@ LOCAL_MODULES = (
     "audio_engine",
     "auto_bot",
     "beatmap_parser",
+    "content_store",
     "game_objects",
     "renderer",
+    "skin_manager",
 )
 
 

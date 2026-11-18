@@ -45,7 +45,19 @@ class AudioEngine:
             "whistle": self._sound(1320, .13, .22),
             "finish": self._sound(440, .22, .30, "square"),
             "clap": self._sound(240, .08, .27, "noise"),
+            "combobreak": self._sound(180, .18, .24, "square"),
+            "sliderslide": self._sound(760, .08, .10),
+            "spinnerspin": self._sound(520, .08, .10),
+            "spinnerbonus": self._sound(1760, .24, .26),
         }
+
+    def apply_skin(self, skin) -> None:
+        self._create_sounds()
+        for name, path in skin.sounds.items():
+            try:
+                self.sounds[name] = pygame.mixer.Sound(str(path))
+            except pygame.error:
+                continue
 
     def generated_track(self, speed: float = 1.0) -> pygame.mixer.Sound:
         duration = 24.0
@@ -124,7 +136,7 @@ class AudioEngine:
         self.paused = False
 
     def hit(self, sound_name: str = "normal") -> None:
-        self.sounds.get(sound_name, self.sounds["normal"]).play()
+        self.sounds.get(sound_name, self.sounds.get("normal")).play()
 
     @staticmethod
     def write_builtin_wav(path: Path) -> None:

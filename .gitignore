@@ -5,3 +5,5 @@ dist/*
 !dist/
 !dist/oSu!x3.exe
 *.spec
+Songs/
+Skins/
