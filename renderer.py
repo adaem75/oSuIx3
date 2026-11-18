@@ -17,14 +17,23 @@ WHITE = (238, 244, 255)
 class Renderer:
     def __init__(self, screen: pygame.Surface) -> None:
         self.screen = screen
-        self.fonts = {}
+        self.fonts: dict[int, pygame.font.Font] = {}
         for size in (14, 18, 24, 32, 46, 64):
             self.fonts[size] = pygame.font.Font(None, size)
         self.trail: list[tuple[float, float, float]] = []
 
+    def font(self, size: int) -> pygame.font.Font:
+        size = max(1, int(size))
+        if size not in self.fonts:
+            try:
+                self.fonts[size] = pygame.font.SysFont("Arial", size)
+            except pygame.error:
+                self.fonts[size] = pygame.font.Font(None, size)
+        return self.fonts[size]
+
     def text(self, value: str, size: int, color: tuple[int, int, int], pos: tuple[int, int],
              center: bool = False) -> pygame.Rect:
-        surface = self.fonts[size].render(value, True, color)
+        surface = self.font(size).render(value, True, color)
         rect = surface.get_rect()
         rect.center = pos if center else rect.center
         if not center:
@@ -113,7 +122,7 @@ class Renderer:
                                    round(radius * (1.7 - .7 * progress)), max(1, round(2 * scale)))
             self.screen.blit(color_surface, (point[0] - color_surface.get_width() // 2,
                                              point[1] - color_surface.get_height() // 2))
-            number = self.fonts[max(14, round(24 * scale))].render(str(obj.combo), True, WHITE)
+            number = self.font(max(14, round(24 * scale))).render(str(obj.combo), True, WHITE)
             number.set_alpha(fade)
             self.screen.blit(number, number.get_rect(center=point))
 
@@ -125,7 +134,7 @@ class Renderer:
             point = self.field((effect.x, effect.y), rect, scale)
             radius_burst = round(radius * (1 + age / 220))
             pygame.draw.circle(self.screen, effect.color, point, radius_burst, 2)
-            label = self.fonts[24].render(effect.text, True, effect.color)
+            label = self.font(24).render(effect.text, True, effect.color)
             label.set_alpha(round(255 * (1 - age / 700)))
             self.screen.blit(label, label.get_rect(center=(point[0], point[1] - round(30 * scale))))
 
