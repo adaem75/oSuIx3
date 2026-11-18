@@ -1,6 +1,6 @@
 oSuIx3 an osu recreation that SUCKS (my first project)
 
-PULSE is a playable, osu!standard-inspired desktop rhythm game written in Python. Its built-in song, hit sounds, and sample chart are generated locally, so it starts without external assets. It supports `.osu` maps, imported `.osz` song archives, and `.osk` custom skins.
+oSuIx3 is a playable, osu!standard-inspired desktop rhythm game written in Python. Its built-in song, hit sounds, and sample chart are generated locally, so it starts without external assets. It supports `.osu` maps, imported `.osz` song archives, and `.osk` custom skins.
 
 ## Run from source
 
@@ -31,18 +31,16 @@ Imported songs and skins are stored in `Songs/` and `Skins/` beside the executab
 
 PULSE uses a centered, responsive 4:3 playfield in osu!'s 512×384 coordinate space. Slider timing honors uninherited beat length and inherited slider velocity; beatmap hit windows are derived from OD.
 
-## Build a standalone executable
+##HOW TO INSTALL
 
-Install the requirements in the active virtual environment, then run:
+so when u download the zip u double click it then double click the main folder then double click dist and inside will be the game, you will have to extract all into a folder
+so that u can repeat the same steps but instead of extracting you just double click the game, windows smartscreen might call it malicious but its not because its malicious you will have to click on more info
+then run anyway. if you still think its malicious i copied this from gemini and a bunch of ais had very similar answers.
+Microsoft Defender SmartScreen flags apps from small developers as "unrecognized" or potentially malicious primarily because they lack download reputation and an expensive digital code-signing certificate. SmartScreen does not actually scan the code inside your file for viruses—instead, it relies on a trust-based reputation system.
 
-```powershell
-python build.py
-```
+Why Small Developers Get Flagged
 
-The script runs the equivalent one-file, windowed PyInstaller build. To invoke PyInstaller directly:
+• Zero Download Reputation: SmartScreen tracks how many Windows users around the world have downloaded and safely run a specific file (identified by its cryptographic hash). Whenever you compile a brand-new .exe—even if you only change one line of code—its file hash changes, resetting its reputation to zero.
+• No Code-Signing Certificate: Established companies buy digital Code Signing Certificates (often costing hundreds of dollars per year) to prove their identity to Windows. Without one, Windows marks the publisher as "Unknown Publisher" and displays the warning screen by default.
+• PyInstaller & Packer Heuristics: Tools like PyInstaller bundle a Python interpreter and compressed scripts inside a single .exe wrapper. Because malware authors sometimes use similar executable packers to hide their code, Windows security tools treat newly compiled single-file executables with extra suspicion until enough users run them safely.
 
-```powershell
-python -m PyInstaller --noconfirm --clean --onefile --windowed --name "oSu!x3" --paths . --collect-all pygame --collect-all numpy --hidden-import audio_engine --hidden-import auto_bot --hidden-import beatmap_parser --hidden-import content_store --hidden-import game_objects --hidden-import renderer --hidden-import skin_manager --hidden-import tkinter --hidden-import tkinter.filedialog main.py
-```
-
-The executable is written to `dist/oSu!x3.exe` on Windows or `dist/oSu!x3` on macOS/Linux. The sample chart and audio are generated in Python; imported maps, skins, audio, and images are read from the persistent content folders. macOS users must build on macOS; PyInstaller does not cross-compile between operating systems.
