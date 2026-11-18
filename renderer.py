@@ -160,7 +160,7 @@ class Renderer:
             delta = obj.time - now_ms
             if delta > preempt_ms:
                 continue
-            progress = min(1.0, max(0.0, (now_ms - (obj.time - preempt_ms)) / preempt_ms))
+            progress = max(0.0, min(1.0, (now_ms - (obj.time - preempt_ms)) / preempt_ms))
             fade_alpha = round(255 * min(1.0, max(0.0, (preempt_ms - delta) / fade_in_ms)))
             alpha = fade_alpha
             if "HD" in state.mods and 0 < delta < 450:
@@ -222,8 +222,9 @@ class Renderer:
                             pygame.draw.circle(self.screen, (135, 190, 225), center, approach_radius,
                                                max(2, round(3 * scale)))
                     disc_size = round(spinner_r * 1.45)
+                    spinner_angle = state.spinner_angle if state.active_spinner is obj else 0.0
                     disc = self.texture("spinner-circle", (disc_size, disc_size),
-                                        angle=math.degrees(state.spinner_angle))
+                                        angle=math.degrees(spinner_angle))
                     if disc:
                         self.screen.blit(disc, disc.get_rect(center=center))
                     else:
@@ -231,7 +232,7 @@ class Renderer:
                         pygame.draw.circle(self.screen, (110, 165, 202), center, round(spinner_r * .66),
                                            max(2, round(scale * 4)))
                         for ray in range(12):
-                            angle = math.tau * ray / 12 + state.spinner_angle
+                            angle = math.tau * ray / 12 + spinner_angle
                             end = (round(center[0] + math.cos(angle) * spinner_r * .58),
                                    round(center[1] + math.sin(angle) * spinner_r * .58))
                             pygame.draw.line(self.screen, (85, 115, 150), center, end, max(1, round(scale * 2)))
@@ -246,7 +247,8 @@ class Renderer:
                                          border_radius=6)
                     self.text("SPINNER", 24, WHITE, (center[0], center[1] - 8), True)
                     elapsed = max(1, now_ms - obj.time)
-                    rpm = state.spinner_rotations() * 60000 / elapsed if state.spinner_last_angle is not None else 0
+                    rpm = (state.spinner_rotations() * 60000 / elapsed
+                           if state.active_spinner is obj and state.spinner_last_angle is not None else 0)
                     self.text(f"{rpm:.0f} RPM", 24, CYAN, (center[0], meter.bottom + 27), True)
                     if ratio >= 1:
                         self.text("CLEAR!", 32, (255, 230, 120), (center[0], center[1] - round(spinner_r * .8)), True)
@@ -271,7 +273,8 @@ class Renderer:
             if not hit_texture:
                 self.screen.blit(color_surface, (point[0] - color_surface.get_width() // 2,
                                                  point[1] - color_surface.get_height() // 2))
-            if delta > 0 and "HD" not in state.mods:
+            if (now_ms < obj.time and not state.has_judged(obj)
+                    and state.active_slider is not obj and "HD" not in state.mods):
                 approach_radius = radius * (3.5 - 2.5 * progress)
                 self.draw_approach_circle(point, approach_radius, color, fade_alpha, scale)
             digit = self.texture(f"default-{obj.combo % 10}", (round(radius * .8), round(radius * .8)), fade)

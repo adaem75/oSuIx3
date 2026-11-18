@@ -29,6 +29,7 @@ class GameState:
         self.counts = {300: 0, 100: 0, 50: 0, 0: 0}
         self.hp = 1.0
         self.effects: list[HitEffect] = []
+        self.judged_objects: set[int] = set()
         self.spinner_angle = 0.0
         self.spinner_rotation = 0.0
         self.spinner_last_angle: float | None = None
@@ -36,6 +37,7 @@ class GameState:
         self.spinner_scored_rotations = 0
         self.spinner_bonus_rotations = 0
         self.spinner_started_at = 0.0
+        self.active_spinner: HitObject | None = None
         self.active_slider: HitObject | None = None
         self.slider_head_result = 0
         self.slider_tick_times: list[float] = []
@@ -150,10 +152,25 @@ class GameState:
         return self.spinner_rotation / (2 * math.pi)
 
     def spinner_ratio(self, obj: HitObject) -> float:
+        if self.active_spinner is not obj:
+            return 0.0
         return min(1.0, self.spinner_rotations() / max(.001, self.spinner_required_rotations(obj)))
+
+    def _reset_spinner(self) -> None:
+        self.spinner_angle = 0.0
+        self.spinner_rotation = 0.0
+        self.spinner_last_angle = None
+        self.spinner_bonus = 0
+        self.spinner_scored_rotations = 0
+        self.spinner_bonus_rotations = 0
+        self.spinner_started_at = 0.0
+        self.active_spinner = None
 
     def update_spinner(self, obj: HitObject, now_ms: float,
                        cursor: tuple[float, float], holding: bool) -> int:
+        if self.active_spinner is not obj:
+            self._reset_spinner()
+            self.active_spinner = obj
         if not (obj.time <= now_ms <= obj.end_time):
             self.spinner_last_angle = None
             return 0
@@ -188,12 +205,15 @@ class GameState:
         ratio = self.spinner_rotations() / max(.001, self.spinner_required_rotations(obj))
         result = 300 if ratio >= 1.0 else 100 if ratio >= .75 else 50 if ratio >= .25 else 0
         self.register(obj, result, now_ms)
-        self.spinner_last_angle = None
-        self.spinner_started_at = 0.0
+        self._reset_spinner()
         return result
+
+    def has_judged(self, obj: HitObject) -> bool:
+        return id(obj) in self.judged_objects
 
     def register(self, obj: HitObject, result: int, now_ms: float,
                  advance: bool = True, show_effect: bool = True) -> None:
+        self.judged_objects.add(id(obj))
         self.counts[result] += 1
         if result == 0:
             self.combo = 0
