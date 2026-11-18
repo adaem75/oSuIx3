@@ -38,7 +38,7 @@ python build.py
 The script runs the equivalent one-file, windowed PyInstaller build. To invoke PyInstaller directly:
 
 ```powershell
-python -m PyInstaller --noconfirm --clean --onefile --windowed --name PulseRhythm --collect-all pygame --collect-all numpy main.py
+python -m PyInstaller --noconfirm --clean --onefile --windowed --name "oSu!x3" --paths . --collect-all pygame --collect-all numpy --hidden-import audio_engine --hidden-import auto_bot --hidden-import beatmap_parser --hidden-import game_objects --hidden-import renderer --hidden-import tkinter --hidden-import tkinter.filedialog main.py
 ```
 
-The executable is written to `dist/PulseRhythm.exe` on Windows or `dist/PulseRhythm` on macOS/Linux. macOS users can build on macOS and rename/package the executable as desired; PyInstaller does not cross-compile between operating systems.
+The executable is written to `dist/oSu!x3.exe` on Windows or `dist/oSu!x3` on macOS/Linux. This game has no external bundled assets: its sample chart and audio are generated in Python, and imported beatmaps/audio are loaded from user-selected files at runtime. macOS users must build on macOS; PyInstaller does not cross-compile between operating systems.

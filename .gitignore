@@ -3,5 +3,5 @@ __pycache__/
 build/
 dist/*
 !dist/
-!dist/PulseRhythm.exe
+!dist/oSu!x3.exe
 *.spec
